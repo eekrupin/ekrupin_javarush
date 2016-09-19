@@ -56,20 +56,9 @@ public class AdvertisementManager {
     }
 
     private ShowListWithParams getShowListWithParams(ArrayList<Advertisement> allVideos, int timeSeconds, int startIdx) {
-        ArrayList<Advertisement> showList = new ArrayList<>();
-        int totalTime = 0;
-        int totalCost = 0;
-        for (int i = startIdx; i <allVideos.size() ; i++) {
-            Advertisement ad = allVideos.get(i);
-            if (ad.getHits()<=0) continue;
-            if (totalTime+ad.getDuration()<=timeSeconds){
-                showList.add(ad);
-                totalTime+=ad.getDuration();
-                totalCost+=ad.getAmountPerOneDisplaying();
-            }
-            if (totalTime==timeSeconds) break;
-        }
-        ShowListWithParams showListWithParams = new ShowListWithParams(totalTime, totalCost, showList);
+
+        ArrayList<Advertisement> showList = getArrayVideos(allVideos, timeSeconds, startIdx, null);
+        ShowListWithParams showListWithParams = new ShowListWithParams(showList);
 
         if (startIdx<allVideos.size()){
             ShowListWithParams alternativeShowListWithParams = getShowListWithParams(allVideos, timeSeconds, startIdx+1);
@@ -79,15 +68,40 @@ public class AdvertisementManager {
         return showListWithParams;
     }
 
+    private ArrayList<Advertisement>getArrayVideos(ArrayList<Advertisement> allVideos, int timeSeconds, int startIdx, ArrayList<Advertisement> usedShowList){
+        ArrayList<Advertisement> showList = new ArrayList<>();
+        int totalTime = 0;
+        for (int i = startIdx; i <allVideos.size() ; i++) {
+            Advertisement ad = allVideos.get(i);
+            if (usedShowList!=null && usedShowList.contains(ad)) continue;
+            if (ad.getHits()<=0) continue;
+            if (totalTime+ad.getDuration()<=timeSeconds){
+                showList.add(ad);
+                totalTime+=ad.getDuration();
+            }
+            if (totalTime==timeSeconds) break;
+        }
+
+        if (totalTime!=timeSeconds && usedShowList==null){
+            ArrayList<Advertisement> addShowList;
+            addShowList = getArrayVideos(allVideos, timeSeconds-totalTime, 0, showList);
+            showList.addAll(addShowList);
+        }
+
+        return showList;
+    }
+
     private class ShowListWithParams implements Comparable{
         private int totalTime;
         private int totalCost;
         private ArrayList<Advertisement> showList;
 
-        public ShowListWithParams(int totalTime, int totalCost, ArrayList<Advertisement> showList) {
-            this.totalTime = totalTime;
-            this.totalCost = totalCost;
+        public ShowListWithParams(ArrayList<Advertisement> showList) {
             this.showList = showList;
+            for (Advertisement ad : showList) {
+                totalTime+=ad.getDuration();
+                totalCost+=ad.getAmountPerOneDisplaying();
+            }
         }
 
         public int getTotalTime() {
