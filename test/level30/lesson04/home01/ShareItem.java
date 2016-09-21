@@ -29,4 +29,31 @@ public class ShareItem {
     public int getItemId() {
         return itemId;
     }
+
+    @Override
+    public String toString() {
+        return "ShareItem{" +
+                "description='" + description + '\'' +
+                ", itemId=" + itemId +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ShareItem)) return false;
+
+        ShareItem shareItem = (ShareItem) o;
+
+        if (getItemId() != shareItem.getItemId()) return false;
+        return getDescription() != null ? getDescription().equals(shareItem.getDescription()) : shareItem.getDescription() == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getDescription() != null ? getDescription().hashCode() : 0;
+        result = 31 * result + getItemId();
+        return result;
+    }
 }
