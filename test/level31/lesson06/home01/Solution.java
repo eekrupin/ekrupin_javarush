@@ -34,7 +34,7 @@ b.txt
 */
 public class Solution {
     private static Map<ZipEntry, byte[]> map = new HashMap<>();
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         String strPathSource = args[0];
         String strPathZip = args[1];
 
