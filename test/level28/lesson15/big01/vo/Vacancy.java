@@ -58,4 +58,33 @@ public class Vacancy {
     public void setUrl(String url) {
         this.url = url;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Vacancy)) return false;
+
+        Vacancy vacancy = (Vacancy) o;
+
+        if (getTitle() != null ? !getTitle().equals(vacancy.getTitle()) : vacancy.getTitle() != null) return false;
+        if (getSalary() != null ? !getSalary().equals(vacancy.getSalary()) : vacancy.getSalary() != null) return false;
+        if (getCity() != null ? !getCity().equals(vacancy.getCity()) : vacancy.getCity() != null) return false;
+        if (getCompanyName() != null ? !getCompanyName().equals(vacancy.getCompanyName()) : vacancy.getCompanyName() != null)
+            return false;
+        if (getSiteName() != null ? !getSiteName().equals(vacancy.getSiteName()) : vacancy.getSiteName() != null)
+            return false;
+        return getUrl() != null ? getUrl().equals(vacancy.getUrl()) : vacancy.getUrl() == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getTitle() != null ? getTitle().hashCode() : 0;
+        result = 31 * result + (getSalary() != null ? getSalary().hashCode() : 0);
+        result = 31 * result + (getCity() != null ? getCity().hashCode() : 0);
+        result = 31 * result + (getCompanyName() != null ? getCompanyName().hashCode() : 0);
+        result = 31 * result + (getSiteName() != null ? getSiteName().hashCode() : 0);
+        result = 31 * result + (getUrl() != null ? getUrl().hashCode() : 0);
+        return result;
+    }
 }

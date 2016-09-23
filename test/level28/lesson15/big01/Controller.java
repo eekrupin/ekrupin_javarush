@@ -23,12 +23,11 @@ public class Controller {
 
     public void scan() {
         List<Vacancy> list = new ArrayList<>();
-        for (Provider provider : providers) {
-            List<Vacancy> vacancies = provider.getJavaVacancies("test");
-            for (Vacancy vacancy : vacancies) {
-                list.add(vacancy);
+            for (Provider provider:providers){
+                for (Vacancy vacancy:provider.getJavaVacancies("SOME TEXT")){
+                    list.add(vacancy);
+                }
             }
-        }
         System.out.println(list.size());
     }
 }
