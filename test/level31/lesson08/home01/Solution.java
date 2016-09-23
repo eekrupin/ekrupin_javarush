@@ -1,6 +1,9 @@
 package com.javarush.test.level31.lesson08.home01;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /* Null Object Pattern
 Почитайте на вики про паттерн "Null Object"
@@ -11,14 +14,14 @@ public class Solution {
     private FileData fileData;
 
     public Solution(String pathToFile) {
-        File file = new File(pathToFile);
         try {
-            fileData = new ConcreteFileData(file.isHidden(), file.canExecute(), file.isDirectory(), file.canWrite());
+            Path path = Paths.get(pathToFile);
+
+            fileData = new ConcreteFileData(Files.isHidden(path), Files.isExecutable(path), Files.isDirectory(path), Files.isWritable(path));
         }
         catch (Exception e) {
             fileData = new NullFileData(e);
         }
-
     }
 
     public FileData getFileData() {

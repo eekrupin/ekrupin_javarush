@@ -9,7 +9,7 @@ import java.io.*;
 */
 public class Solution {
     public static void main(String[] args) throws IOException {
-        StringWriter writer = getAllDataFromInputStream(new FileInputStream("src\\com\\javarush\\test\\level32\\lesson04\\home01\\testFile.log"));
+        StringWriter writer = getAllDataFromInputStream(new FileInputStream("testFile.log"));
         System.out.println(writer.toString());
     }
 

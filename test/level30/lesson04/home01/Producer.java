@@ -19,7 +19,7 @@ public class Producer implements Runnable {
 
         for (int i = 1; i <=9 ; i++) {
 
-            System.out.format("Элемент 'ShareItem-%s' добавлен, %s", i, System.getProperty("line.separator"));
+            System.out.format("Элемент 'ShareItem-%d' добавлен%n", i);
             ShareItem shareItem = new ShareItem("ShareItem-" + i, i);
             queue.offer(shareItem);
             try {

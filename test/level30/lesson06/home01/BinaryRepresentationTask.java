@@ -22,7 +22,10 @@ public class BinaryRepresentationTask extends RecursiveTask<String>{
         int b = x / 2;
         String result = String.valueOf(a);
         if (b > 0) {
-            return binaryRepresentationMethod(b) + result;
+
+            BinaryRepresentationTask task = new BinaryRepresentationTask(b);
+            task.fork();
+            return task.join() + result;
         }
         return result;
     }

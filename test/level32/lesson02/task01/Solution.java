@@ -1,5 +1,7 @@
 package com.javarush.test.level32.lesson02.task01;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.RandomAccessFile;
 
 /* Запись в файл
@@ -11,23 +13,16 @@ import java.io.RandomAccessFile;
 Если файл слишком короткий, то записать в конец файла.
 */
 public class Solution {
-    public static void main(String... args) {
-//        String fileName = args[0];
-//        int number = Integer.parseInt(args[0]);
-//        String text = args[0];
+    public static void main(String... args) throws IOException {
+        String fileName = args[0];
+        int number = Integer.parseInt(args[1]);
+        String text = args[2];
 
-        String fileName = "D:\\Java\\TestData\\Random.txt";
-        int number = 14;
-        String text = "!!!55555--666666 55555--666666";
+        RandomAccessFile file = new RandomAccessFile(fileName, "rw");
+        if (number > file.length()) file.seek(file.length());
+        else file.seek(number);
+        file.write(text.getBytes());
 
-        try (RandomAccessFile file = new RandomAccessFile(fileName, "rw")){
-            int lenght = text.length();
-            if (file.length()-number>=lenght) file.seek(number);
-            else file.seek(file.length());
-            byte[] bytes = new byte[lenght];
-            file.write(text.getBytes());
-        } catch (java.io.IOException e) {
-        }
 
     }
 }

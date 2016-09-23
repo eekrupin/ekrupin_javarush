@@ -40,10 +40,10 @@ public class Solution extends SimpleFileVisitor<Path> {
 
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-        File fileObj = file.toFile();
-        String name = fileObj.getName().toLowerCase();
-        if (name.endsWith(".zip") || name.endsWith(".rar")) archived.add(fileObj.getAbsolutePath());
-        else failed.add(fileObj.getAbsolutePath());
+        String fileName = file.getFileName().toString();
+        if (fileName.endsWith(".zip") || fileName.endsWith(".rar")) {
+            archived.add(file.toString());
+        }
         return super.visitFile(file, attrs);
     }
 
@@ -54,4 +54,7 @@ public class Solution extends SimpleFileVisitor<Path> {
     public List<String> getFailed() {
         return failed;
     }
+
+
+
 }
