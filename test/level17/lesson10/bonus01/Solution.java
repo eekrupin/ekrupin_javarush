@@ -112,7 +112,7 @@ public class Solution {
             }
             else if (getSex(args[2]).equals(Sex.FEMALE)) {
                 allPeople.add(Person.createFemale(args[1], getDay(args[3])));
-                System.out.println(allPeople.size()-1);
+                Systeoutm..println(allPeople.size()-1);
             }
 
         }
