@@ -5,6 +5,10 @@ import com.javarush.test.level32.lesson08.bonus01.Item;
 import com.javarush.test.level32.lesson08.bonus01.Small;
 
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /* Дженерики для создания прокси-объекта
 В классе Solution создайте публичный метод getProxy
@@ -24,8 +28,23 @@ public class Solution {
         test(solution.getProxy(Big.class));                         //true true false т.к. Big наследуется от Item
     }
 
-    public Object getProxy(Class<Item> itemClass) {
-        return Proxy.getInvocationHandler(itemClass);
+    public <T extends Item > T getProxy(Class<T> returnType, Class ... additionalInterfaces) {
+        List<Class<T>> classes = new ArrayList<>();
+        classes.add(returnType);
+        for (Class<T> aClass : Arrays.asList(additionalInterfaces)) {
+            classes.add(aClass);
+        }
+
+
+        Class<T>[] arrClassess = new Class[classes.size()];
+        for (int i = 0; i < classes.size(); i++) {
+            arrClassess[i] = classes.get(i);
+        }
+
+        ItemInvocationHandler itemInvocationHandler = new ItemInvocationHandler();
+        return (T)Proxy.newProxyInstance(returnType.getClassLoader(), arrClassess, itemInvocationHandler);
+
+
     }
 
 
