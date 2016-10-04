@@ -38,7 +38,28 @@ public class View extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        String command = e.getActionCommand();
+        switch (command) {
 
+            case "Новый":
+                controller.createNewDocument();
+                break;
+            case "Открыть":
+                controller.openDocument();
+                break;
+            case "Сохранить":
+                controller.saveDocument();
+                break;
+            case "Сохранить как...":
+                controller.saveDocumentAs();
+                break;
+            case "Выход":
+                controller.exit();
+                break;
+            case "О программе":
+                showAbout();
+                break;
+        }
     }
 
     public Controller getController() {
@@ -88,7 +109,13 @@ public class View extends JFrame implements ActionListener {
     }
 
     public void selectedTabChanged() {
-
+        switch (tabbedPane.getSelectedIndex()){
+            case 0: controller.setPlainText(plainTextPane.getText());
+                break;
+            case 1: plainTextPane.setText(controller.getPlainText());
+                break;
+        }
+        resetUndo();
     }
 
     public boolean canUndo() {
@@ -114,4 +141,23 @@ public class View extends JFrame implements ActionListener {
     public void resetUndo(){
         undoManager.discardAllEdits();
     }
+
+    public boolean isHtmlTabSelected(){
+        return tabbedPane.getSelectedIndex() == 0;
+    }
+
+    public void selectHtmlTab(){
+        tabbedPane.setSelectedIndex(0);
+        resetUndo();
+    }
+
+    public void update(){
+        htmlTextPane.setDocument(controller.getDocument());
+    }
+
+    public void showAbout(){
+        JOptionPane.showMessageDialog(this, "Много много слов", "О программе", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+
 }
