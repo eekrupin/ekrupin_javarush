@@ -1,14 +1,12 @@
 package com.javarush.test.level39.lesson09.big01;
 
-import com.javarush.test.level39.lesson09.big01.query.DateQuery;
-import com.javarush.test.level39.lesson09.big01.query.EventQuery;
-import com.javarush.test.level39.lesson09.big01.query.IPQuery;
-import com.javarush.test.level39.lesson09.big01.query.UserQuery;
+import com.javarush.test.level39.lesson09.big01.query.*;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,7 +14,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery {
+public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery, QLQuery {
     private Path logDir;
     private ArrayList<ItemLog> logs = new ArrayList<>();
 
@@ -64,8 +62,7 @@ public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery {
         String[] params  = line.split("\\t");
         String ip = params[0];
         String user  = params[1];
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-        Date date  = dateFormat.parse(params[2]);
+        Date date = getDate(params[2]);
         String[] partsOfEvent = params[3].split(" ");
         Event event = Event.valueOf(partsOfEvent[0]);
         int task = 0;
@@ -76,6 +73,11 @@ public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery {
         ItemLog itemLog = new ItemLog(ip, user, date, event, task, status);
 
         return itemLog;
+    }
+
+    private Date getDate(String param) throws ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+        return dateFormat.parse(param);
     }
 
     @Override
@@ -145,6 +147,7 @@ public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery {
             this.task = task;
             this.status = status;
         }
+
     }
 
     @Override
@@ -343,56 +346,179 @@ public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery {
 
     @Override
     public int getNumberOfAllEvents(Date after, Date before) {
-        Set<Event> set = new HashSet<>();
-        for (ItemLog itemLog : logs) {
-            Date date = itemLog.date;
-            if (isDateAccept(after, before, date)) set.add(itemLog.event);
-        }
+        Set<Event> set = getAllEvents(after, before);
         return set.size();
     }
 
     @Override
     public Set<Event> getAllEvents(Date after, Date before) {
-        return null;
+        Set<Event> set = new HashSet<>();
+        for (ItemLog itemLog : logs) {
+            Date date = itemLog.date;
+            if (isDateAccept(after, before, date)) set.add(itemLog.event);
+        }
+        return set;
     }
 
     @Override
     public Set<Event> getEventsForIP(String ip, Date after, Date before) {
-        return null;
+        Set<Event> set = new HashSet<>();
+        for (ItemLog itemLog : logs) {
+            Date date = itemLog.date;
+            if (ip.equals(itemLog.ip) && isDateAccept(after, before, date)) set.add(itemLog.event);
+        }
+        return set;
     }
 
     @Override
     public Set<Event> getEventsForUser(String user, Date after, Date before) {
-        return null;
+        Set<Event> set = new HashSet<>();
+        for (ItemLog itemLog : logs) {
+            Date date = itemLog.date;
+            if (user.equals(itemLog.user) && isDateAccept(after, before, date)) set.add(itemLog.event);
+        }
+        return set;
     }
 
     @Override
     public Set<Event> getFailedEvents(Date after, Date before) {
-        return null;
+        Set<Event> set = new HashSet<>();
+        for (ItemLog itemLog : logs) {
+            Date date = itemLog.date;
+            if (Status.FAILED.equals(itemLog.status) && isDateAccept(after, before, date)) set.add(itemLog.event);
+        }
+        return set;
     }
 
     @Override
     public Set<Event> getErrorEvents(Date after, Date before) {
-        return null;
+        Set<Event> set = new HashSet<>();
+        for (ItemLog itemLog : logs) {
+            Date date = itemLog.date;
+            if (Status.ERROR.equals(itemLog.status) && isDateAccept(after, before, date)) set.add(itemLog.event);
+        }
+        return set;
     }
 
     @Override
     public int getNumberOfAttemptToSolveTask(int task, Date after, Date before) {
-        return 0;
+        int count = 0;
+        for (ItemLog itemLog : logs) {
+            Date date = itemLog.date;
+            if (Event.SOLVE_TASK.equals(itemLog.event) && task == itemLog.task && isDateAccept(after, before, date)) count++;
+        }
+        return count;
     }
 
     @Override
     public int getNumberOfSuccessfulAttemptToSolveTask(int task, Date after, Date before) {
-        return 0;
+        int count = 0;
+        for (ItemLog itemLog : logs) {
+            Date date = itemLog.date;
+            if (Event.SOLVE_TASK.equals(itemLog.event) && task == itemLog.task && Status.OK.equals(itemLog.status) && isDateAccept(after, before, date)) count++;
+        }
+        return count;
     }
 
     @Override
     public Map<Integer, Integer> getAllSolvedTasksAndTheirNumber(Date after, Date before) {
-        return null;
+        Map<Integer, Integer> map = new HashMap<>();
+        Integer curCount = null;
+        for (ItemLog itemLog : logs) {
+            Date date = itemLog.date;
+            curCount = map.get(itemLog.task);
+            if (Event.SOLVE_TASK.equals(itemLog.event) && isDateAccept(after, before, date)) map.put(itemLog.task, curCount==null?1:++curCount);
+        }
+        return map;
     }
 
     @Override
     public Map<Integer, Integer> getAllDoneTasksAndTheirNumber(Date after, Date before) {
+        Map<Integer, Integer> map = new HashMap<>();
+        Integer curCount = null;
+        for (ItemLog itemLog : logs) {
+            Date date = itemLog.date;
+            curCount = map.get(itemLog.task);
+            if (Event.DONE_TASK.equals(itemLog.event) && isDateAccept(after, before, date)) map.put(itemLog.task, curCount==null?1:++curCount);
+        }
+        return map;
+    }
+
+    @Override
+    public Set<Object> execute(String query) {
+        if (query.equalsIgnoreCase("get ip")) return getObjectSet(getUniqueIPs(null, null));
+        else if (query.equalsIgnoreCase("get user")) return getObjectSet(getAllUsers());
+        else if (query.equalsIgnoreCase("get date")) return getObjectSet(getAllDates());
+        else if (query.equalsIgnoreCase("get event")) return getObjectSet(getAllEvents(null, null));
+        else if (query.equalsIgnoreCase("get status")) return getObjectSet(getAllStatuses());
+        else {
+            try {
+                return getResultOfQueryByParameters(query);
+            } catch (NoSuchFieldException|IllegalAccessException|ParseException e) {
+                e.printStackTrace();
+            }
+        }
         return null;
     }
+
+    private <E> Set<Object> getObjectSet(Set<E> sourceSet) {
+        Set<Object> set = new HashSet<>();
+        for (E e : sourceSet) set.add(e);
+        return set;
+    }
+
+    public Set<Date> getAllDates() {
+        Set<Date> set = new HashSet<>();
+        for (ItemLog itemLog : logs) {
+            set.add(itemLog.date);
+        }
+        return set;
+    }
+
+    public Set<Status> getAllStatuses() {
+        Set<Status> set = new HashSet<>();
+        for (ItemLog itemLog : logs) {
+            set.add(itemLog.status);
+        }
+        return set;
+    }
+
+    private Set<Object> getResultOfQueryByParameters(String query) throws NoSuchFieldException, IllegalAccessException, ParseException {
+        String[] parts = query.split("(get)|(for)|(=)|(and date between)|(and)");
+        String filed1 = getFieldString(parts[1]);
+        String filed2 = getFieldString(parts[2]);
+        String filed3 = getFieldString(parts[3].replace("\"", ""));
+        Date dateFrom = (Date)getObjectFromString(Date.class, getFieldString(parts[4].replace("\"", "")));
+        Date dateTo = (Date)getObjectFromString(Date.class, getFieldString(parts[5].replace("\"", "")));
+
+
+        Set<Object> set = getDataFromLog(filed1, filed2, filed3, dateFrom, dateTo);
+
+        return set;
+    }
+
+    private String getFieldString(String part) {
+        return part.trim();
+    }
+
+    private Set<Object> getDataFromLog(String filed1, String filed2, String filed3, Date dateFrom, Date dateTo) throws NoSuchFieldException, IllegalAccessException, ParseException {
+        Set<Object> set = new HashSet<>();
+        Field objectField1 = ItemLog.class.getDeclaredField(filed1);
+        Field objectField2 = ItemLog.class.getDeclaredField(filed2);
+        Object value = getObjectFromString(objectField2.getType(), filed3);
+        for (ItemLog itemLog : logs) {
+            if (isDateAccept(dateFrom, dateTo, itemLog.date) && objectField2.get(itemLog).equals(value)) set.add(objectField1.get(itemLog));
+        }
+        return set;
+    }
+
+    private Object getObjectFromString(Class<?> type, String string) throws ParseException {
+        if (type == String.class) return string;
+        else if (type == Date.class) return getDate(string);
+        else if (type == Event.class) return Event.valueOf(string);
+        else if (type == Status.class) return Status.valueOf(string);
+        else return null;
+    }
+
+
 }
