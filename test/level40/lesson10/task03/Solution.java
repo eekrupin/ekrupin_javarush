@@ -12,13 +12,23 @@ package com.javarush.test.level40.lesson10.task03;
 Выполни задание, используя библиотеку Joda Time версии 2.9.1
 */
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
+import java.util.Locale;
+
 public class Solution {
     public static void main(String[] args) {
         System.out.println(weekDayOfBirthday("30.05.1984", "2015"));
     }
 
     public static String weekDayOfBirthday(String birthday, String year) {
-        //напишите тут ваш код
-        return null;
+
+        DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("dd.MM.yyyy");
+        DateTime dateTime = dateTimeFormatter.parseDateTime(birthday);
+        dateTime = dateTime.plusYears(Integer.parseInt(year)-dateTime.getYear());
+
+        return dateTime.dayOfWeek().getAsText(Locale.ITALIAN);
     }
 }
