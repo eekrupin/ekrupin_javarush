@@ -1,6 +1,10 @@
 package com.javarush.test.level34.lesson15.big01.model;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Created by Евгений on 07.10.2016.
@@ -20,7 +24,12 @@ public class Box extends CollisionObject implements Movable{
 
     @Override
     public void draw(Graphics graphics) {
-        graphics.setColor(Color.ORANGE);
-        graphics.fillRect(getX(), getY(), getWidth(), getHeight());
+        try {
+            BufferedImage image = ImageIO.read(new File("src\\com\\javarush\\test\\level34\\lesson15\\big01\\res\\box.jpg"));
+            graphics.drawImage(image, getX(), getY(), getWidth(), getHeight(), null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }
